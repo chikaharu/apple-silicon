@@ -1,0 +1,40 @@
+name: Apple Silicon Numerical Experiment
+
+on:
+  push:
+    paths:
+      - "experiments/apple_silicon_numeric.c"
+      - ".github/workflows/apple-silicon-numeric.yml"
+  workflow_dispatch:
+
+jobs:
+  experiment:
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm architecture
+        run: |
+          uname -m
+          sysctl -n machdep.cpu.brand_string || true
+          sw_vers
+
+      - name: Build with Apple Accelerate
+        run: |
+          mkdir -p build
+          clang -O3 -ffast-math experiments/apple_silicon_numeric.c \
+            -framework Accelerate -o build/apple_silicon_numeric
+          file build/apple_silicon_numeric
+
+      - name: Run numerical experiment
+        run: |
+          ./build/apple_silicon_numeric | tee build/results.txt
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-silicon-numerical-results
+          path: |
+            build/apple_silicon_numeric
+            build/results.txt
