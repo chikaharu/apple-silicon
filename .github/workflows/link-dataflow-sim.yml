@@ -1,0 +1,26 @@
+name: Link Dataflow Architecture Simulation
+
+on:
+  push:
+    paths:
+      - "experiments/link_dataflow_sim.c"
+      - ".github/workflows/link-dataflow-sim.yml"
+  workflow_dispatch:
+
+jobs:
+  simulate:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          mkdir -p build
+          clang -O3 experiments/link_dataflow_sim.c -o build/link_dataflow_sim
+          file build/link_dataflow_sim
+      - name: Run simulation
+        run: |
+          ./build/link_dataflow_sim | tee build/link_dataflow_results.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: link-dataflow-simulation
+          path: build/link_dataflow_results.txt
