@@ -1,0 +1,30 @@
+name: Link vs Matrix Numerical Experiment
+
+on:
+  push:
+    paths:
+      - "experiments/link_vs_matrix.c"
+      - ".github/workflows/link-vs-matrix.yml"
+  workflow_dispatch:
+
+jobs:
+  experiment:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm architecture
+        run: |
+          uname -m
+          sysctl -n machdep.cpu.brand_string || true
+      - name: Build
+        run: |
+          mkdir -p build
+          clang -O3 -ffast-math experiments/link_vs_matrix.c -o build/link_vs_matrix
+          file build/link_vs_matrix
+      - name: Run
+        run: |
+          ./build/link_vs_matrix | tee build/link_vs_matrix_results.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: link-vs-matrix-results
+          path: build/link_vs_matrix_results.txt
